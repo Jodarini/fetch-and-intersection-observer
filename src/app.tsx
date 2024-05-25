@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
-interface User {
+interface Users {
   firstName: string
   lastName: string
   id: number
@@ -8,19 +8,41 @@ interface User {
 }
 
 export default function app() {
-  const [users, setUsers] = useState<User[]>()
+  const [users, setUsers] = useState<Users[]>([])
+  const observedRef = useRef()
+  const [skip, setSkip] = useState(0)
+
+  const intersectionCallback = (entries: IntersectionObserverEntry[]) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        getUsers()
+        console.log('intersecting!!!');
+      }
+    });
+  }
 
   useEffect(() => {
-    const getUsers = async () => {
-      const res = await fetch('http://dummyjson.com/users?&limit=10')
-      const data = await res.json()
-      setUsers(data.users)
+    let observer = new IntersectionObserver(intersectionCallback);
+    if (observedRef.current) {
+      observer.observe(observedRef.current)
     }
-    getUsers()
-  }, [])
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [users])
+
+  const getUsers = async () => {
+    const res = await fetch(`http://dummyjson.com/users?&limit=10&skip=${skip}`)
+    const data = await res.json()
+    setUsers(prevUsers => [...prevUsers, ...data.users])
+    setSkip(prev => prev + 10)
+  }
+
+
   return (
-    <div className="flex flex-col bg-black">
-      <h1 className="text-purple-700 text-3xl">app</h1>
+    <div className="flex flex-col gap-4">
+      <h1 className="text-3xl">app</h1>
       {
         users?.map((user) => (
           <div key={user.id}>
@@ -30,6 +52,7 @@ export default function app() {
           </div>
         ))
       }
+      <p ref={observedRef}>Loading more...</p>
     </div>
   )
 }
