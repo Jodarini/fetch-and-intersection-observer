@@ -1,7 +1,6 @@
-
 export default function app() {
   return (
-    <div>app</div>
+    <div className="text-purple-700 text-3xl">app</div>
   )
 }
 
