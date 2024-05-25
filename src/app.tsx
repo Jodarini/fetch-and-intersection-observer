@@ -19,7 +19,7 @@ export default function app() {
     getUsers()
   }, [])
   return (
-    <>
+    <div className="flex">
       <h1 className="text-purple-700 text-3xl">app</h1>
       {
         users?.map((user) => (
@@ -30,7 +30,7 @@ export default function app() {
           </div>
         ))
       }
-    </>
+    </div>
   )
 }
 
