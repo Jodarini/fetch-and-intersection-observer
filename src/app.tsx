@@ -11,12 +11,12 @@ export default function app() {
   const [users, setUsers] = useState<Users[]>([])
   const observedRef = useRef()
   const [skip, setSkip] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
 
   const intersectionCallback = (entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         getUsers()
-        console.log('intersecting!!!');
       }
     });
   }
@@ -33,10 +33,15 @@ export default function app() {
   }, [users])
 
   const getUsers = async () => {
-    const res = await fetch(`http://dummyjson.com/users?&limit=10&skip=${skip}`)
+    const res = await fetch(`http://dummyjson.com/users?&limit=10&skip=${skip * 10}`)
     const data = await res.json()
-    setUsers(prevUsers => [...prevUsers, ...data.users])
-    setSkip(prev => prev + 10)
+    if (data.users.length === 0) {
+      setHasMore(false)
+    } else {
+      setUsers(prevUsers => [...prevUsers, ...data.users])
+      setSkip(prev => prev + 1)
+    }
+
   }
 
 
@@ -52,7 +57,9 @@ export default function app() {
           </div>
         ))
       }
-      <p ref={observedRef}>Loading more...</p>
+      {hasMore &&
+        <p ref={observedRef}>Loading more...</p>
+      }
     </div>
   )
 }
