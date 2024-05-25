@@ -19,7 +19,7 @@ export default function app() {
     getUsers()
   }, [])
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-col">
       <h1 className="text-purple-700 text-3xl">app</h1>
       {
         users?.map((user) => (
