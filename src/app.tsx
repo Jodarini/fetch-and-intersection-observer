@@ -26,7 +26,6 @@ export default function app() {
     if (observedRef.current) {
       observer.observe(observedRef.current)
     }
-
     return () => {
       observer.disconnect()
     }
@@ -41,9 +40,7 @@ export default function app() {
       setUsers(prevUsers => [...prevUsers, ...data.users])
       setSkip(prev => prev + 1)
     }
-
   }
-
 
   return (
     <div className="flex flex-col gap-4">
@@ -58,9 +55,8 @@ export default function app() {
         ))
       }
       {hasMore &&
-        <p ref={observedRef}>Loading more...</p>
+        <div ref={observedRef as any}>Loading more...</div>
       }
     </div>
   )
 }
-
