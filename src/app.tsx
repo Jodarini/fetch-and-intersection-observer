@@ -1,4 +1,4 @@
-import { ChangeEventHandler, FormEvent, FormEventHandler, useEffect, useRef, useState } from "react"
+import { ChangeEvent, useEffect, useRef, useState } from "react"
 
 interface Users {
   firstName: string
@@ -12,19 +12,19 @@ export default function app() {
   const observedRef = useRef()
   const [skip, setSkip] = useState(0)
   const [hasMore, setHasMore] = useState(true)
-  const [searchValue, setSearchValue] = useState()
+  const [searchValue, setSearchValue] = useState('')
 
   const intersectionCallback = (entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        getUsers()
+      if (entry.isIntersecting && hasMore) {
+        loadMoreUsers(searchValue)
       }
     });
   }
 
   useEffect(() => {
     let observer = new IntersectionObserver(intersectionCallback);
-    if (observedRef.current) {
+    if (observedRef.current && hasMore) {
       observer.observe(observedRef.current)
     }
     return () => {
@@ -32,39 +32,40 @@ export default function app() {
     }
   }, [users])
 
-  const getUsers = async () => {
-    const res = await fetch(`http://dummyjson.com/users?&limit=10&skip=${skip * 10}`)
+  useEffect(() => {
+    loadMoreUsers(searchValue)
+    setHasMore(true)
+  }, [searchValue])
+
+  const loadMoreUsers = async (value: string) => {
+    if (value === undefined) value = ''
+    const res = await fetch(`http://dummyjson.com/users/search?q=${value}&limit=10&skip=${skip}`)
     const data = await res.json()
     if (data.users.length === 0) {
       setHasMore(false)
     } else {
-      setUsers(prevUsers => [...prevUsers, ...data.users])
-      setSkip(prev => prev + 1)
+
+      setSkip(prev => prev += data.users.length)
+      if (skip === 0) {
+        setUsers(data.users)
+      } else {
+        setUsers(prevUsers => [...prevUsers, ...data.users])
+      }
     }
   }
 
-  const searchUsers = async () => {
-    const res = await fetch(`http://dummyjson.com/users/search?q=${searchValue}`)
-    const data = await res.json()
-    if (data.users.length === 0) {
-      setHasMore(false)
-    } else {
-      setUsers(data.users)
-      setSkip(prev => prev + 1)
-    }
+  const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSkip(0)
+    setSearchValue(e.target.value)
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    searchUsers()
-  }
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-3xl">app</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="text" placeholder=" search..." onChange={e => setSearchValue(e.target.value)} name={searchValue} />
+      <form>
+        <input type="text" placeholder=" search..." onChange={handleOnChange} value={searchValue} />
       </form>
-
+      {searchValue}
       {
         users?.map((user) => (
           <div key={user.id}>
@@ -74,9 +75,8 @@ export default function app() {
           </div>
         ))
       }
-      {hasMore &&
-        <div ref={observedRef as any}>Loading more...</div>
-      }
+      <span ref={observedRef as any}>end of userList</span>
+
     </div>
   )
 }
