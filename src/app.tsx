@@ -1,4 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react"
+import Header from "./header"
 
 interface Users {
   firstName: string
@@ -60,23 +61,25 @@ export default function app() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-3xl">app</h1>
-      <form>
-        <input type="text" placeholder=" search..." onChange={handleOnChange} value={searchValue} />
+    <div className="w-full h-full">
+      <Header />
+      <form className="w-full p-4">
+        <input className="w-full rounded-3xl p-2 bg-slate-700/50" type="text" placeholder=" search..." onChange={handleOnChange} value={searchValue} />
       </form>
-      {searchValue}
-      {
-        users?.map((user) => (
-          <div key={user.id}>
-            <p>{user.firstName}</p>
-            <p>{user.lastName}</p>
-            <img src={user.image}></img>
-          </div>
-        ))
-      }
-      <span ref={observedRef as any}>end of userList</span>
+      <div className="flex flex-col gap-4">
+        {searchValue}
+        {
+          users?.map((user) => (
+            <div key={user.id} className="bg-gray-900/10 border-b-gray-700 border-t-gray-700 border-t border-b p-4">
+              <p>{user.firstName}</p>
+              <p>{user.lastName}</p>
+              <img src={user.image}></img>
+            </div>
+          ))
+        }
+        <span ref={observedRef as any}>end of userList</span>
 
+      </div>
     </div>
   )
 }
