@@ -4,6 +4,8 @@ import Header from "./header"
 interface Users {
   firstName: string
   lastName: string
+  email: string
+  phone: string
   id: number
   image: string
 }
@@ -61,19 +63,24 @@ export default function app() {
   }
 
   return (
-    <div className="w-full h-full">
+    <div className="h-full w-full">
       <Header />
-      <form className="w-full p-4">
-        <input className="w-full rounded-3xl p-2 bg-slate-700/50" type="text" placeholder=" search..." onChange={handleOnChange} value={searchValue} />
+      <form className="w-full p-4 sticky top-0 bg-slate-800">
+        <input className="w-full rounded-3xl bg-slate-700/50 p-2" type="text" placeholder=" search..." onChange={handleOnChange} value={searchValue} />
       </form>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col">
         {searchValue}
         {
           users?.map((user) => (
-            <div key={user.id} className="bg-gray-900/10 border-b-gray-700 border-t-gray-700 border-t border-b p-4">
-              <p>{user.firstName}</p>
-              <p>{user.lastName}</p>
-              <img src={user.image}></img>
+            <div key={user.id} className="flex w-full border-t border-t-gray-700 bg-gray-900/10 p-4">
+              <div className="flex flex-row gap-1">
+                <img className="size-24" src={user.image}></img>
+                <div className="flex flex-col break-all">
+                  <p>{user.firstName} {user.lastName}</p>
+                  <p>{user.phone}</p>
+                  <p>{user.email}</p>
+                </div>
+              </div>
             </div>
           ))
         }
