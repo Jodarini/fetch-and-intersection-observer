@@ -22,8 +22,6 @@ export default function app() {
   const [isFetching, setIsFetching] = useState(false)
 
   const debouncedFetch = useDebouncedCallback((value) => {
-    // if (isFetching) return
-    // setIsFetching(true)
     fetchUsers(value)
   }, 500
   )
@@ -83,16 +81,16 @@ export default function app() {
   return (
     <div className="h-full w-full max-w-md">
       <Header />
-      <form className="w-full p-4 sticky top-0 bg-slate-800">
-        <input className="w-full rounded-3xl bg-slate-700/50 p-2" type="text" placeholder=" search..." onChange={handleOnChange} />
-      </form>
-      <div className="flex flex-col">
+      <div className="flex flex-col shadow shadow-slate-900">
+        <form className="sticky top-0 w-full bg-slate-900/10 p-4">
+          <input className="w-full rounded-3xl bg-gray-700 p-2 shadow-inner shadow-gray-900" type="text" placeholder=" search..." onChange={handleOnChange} />
+        </form>
         {!isFetching && users.length === 0 ? <div>No users found</div> :
           users?.map((user) => (
-            <div key={user.id} className="flex w-full border-t border-t-gray-700 bg-gray-900/10 p-4">
+            <div key={user.id} className="flex w-full border-t border-t-gray-700/30 bg-gray-900/10 p-4">
               <div className="flex flex-row gap-1">
                 <img className="size-24" src={user.image}></img>
-                <div className="flex flex-col break-all">
+                <div className="flex flex-col break-all ">
                   <p>{user.firstName} {user.lastName}</p>
                   <p>{user.phone}</p>
                   <p>{user.email}</p>
