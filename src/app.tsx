@@ -20,22 +20,20 @@ export default function app() {
   const [hasMore, setHasMore] = useState(true)
   const [searchValue, setSearchValue] = useState('')
   const [isFetching, setIsFetching] = useState(false)
+  const prevSearchValue = useRef(searchValue)
 
-  const debouncedFetch = useDebouncedCallback((value) => {
-    fetchUsers(value)
-  }, 500
-  )
   const intersectionCallback = (entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting && hasMore) {
-        debouncedFetch(true)
+      if (entry.isIntersecting) {
+        prevSearchValue.current = searchValue
+        debounceFetch()
       }
     });
   }
   let observer = new IntersectionObserver(intersectionCallback);
 
   useEffect(() => {
-    if (observedRef.current && hasMore) {
+    if (observedRef.current) {
       observer.observe(observedRef.current)
     }
     return () => {
@@ -45,37 +43,43 @@ export default function app() {
 
   useEffect(() => {
     setSkip(0)
-    setHasMore(true)
-    fetchUsers(false)
+    debounceFetch()
 
   }, [searchValue])
 
-  const fetchUsers = async (loadMore: boolean) => {
+  const fetchUsers = async () => {
     if (isFetching) return
+
     setIsFetching(true)
+
     const res = await fetch(`${URL}search?q=${searchValue}&limit=10&skip=${skip}`)
     const data = await res.json()
-    if (data.users.length === 0 && loadMore) {
+
+    if (data.total <= 10 || data.total === skip) {
       setHasMore(false)
     } else {
-      setSkip(prev => prev += data.users.length)
-      if (skip === 0) {
-        setUsers(data.users)
-      } else {
-        setUsers(prevUsers => [...prevUsers, ...data.users])
-      }
+      setHasMore(true)
     }
+
+    setSkip(prev => prev += data.users.length)
+    if (searchValue !== prevSearchValue.current) {
+      setUsers(data.users)
+    } else {
+      setUsers(prevUsers => [...prevUsers, ...data.users])
+    }
+
     setIsFetching(false)
   }
 
-  const debounced = useDebouncedCallback((value) => {
-    setSearchValue(value)
-  }, 1000
+  const debounceFetch = useDebouncedCallback(() => {
+    fetchUsers()
+  }, 500
   )
 
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSkip(0)
-    debounced(e.target.value)
+    prevSearchValue.current = searchValue
+    setSearchValue(e.target.value)
   }
 
   return (
@@ -100,7 +104,9 @@ export default function app() {
           ))
         }
         {isFetching && <div className="w-full text-center">Loading...</div>}
-        <div className="my-8" ref={observedRef as any}></div>
+        {hasMore &&
+          <div className="my-8" ref={observedRef as any}></div>
+        }
       </div>
     </div>
   )
