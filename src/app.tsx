@@ -48,12 +48,16 @@ export default function app() {
   )
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search).get('q')
+    searchParams && setSearchValue(searchParams)
+  }, [])
+
+  useEffect(() => {
     setSkip(0)
     debounceFetch()
   }, [searchValue, debounceFetch])
 
   const fetchUsers = async (search: string, skip: number) => {
-    // if (!searchValue) return
     setIsFetching(true)
 
     const res = await fetch(`${URL}search?q=${search}&limit=10&skip=${skip}`)
@@ -67,7 +71,6 @@ export default function app() {
 
     setSkip(prev => prev += data.users.length)
     setUsers(prevData => (skip === 0 ? data.users : [...prevData, ...data.users]));
-
     setIsFetching(false)
   }
 
@@ -76,6 +79,7 @@ export default function app() {
     setSkip(0)
     prevSearchValue.current = searchValue
     setSearchValue(e.target.value)
+    window.history.pushState({}, "", `search?q=${e.target.value}`)
   }
 
   return (
@@ -85,7 +89,7 @@ export default function app() {
         <form className="sticky top-0 w-full bg-slate-900/10 p-4">
           <input className="w-full rounded-3xl bg-gray-700 p-2 shadow-inner shadow-gray-900" type="text" placeholder=" Search users..." onChange={handleOnChange} />
         </form>
-        {!isFetching && users.length === 0 ? <div className="text-center">No users found</div> :
+        {!isFetching && users.length === 0 ? <div className="text-center italic pb-2"> - No users found -</div> :
           users?.map((user, index) => (
             <div key={`${user.id}-${index}`} className="flex w-full border-t border-t-gray-700/30 bg-gray-900/10 p-4">
               <div className="flex flex-row gap-1">
