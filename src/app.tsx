@@ -22,6 +22,7 @@ export default function app() {
   const [isFetching, setIsFetching] = useState(false)
   const prevSearchValue = useRef(searchValue)
 
+
   const intersectionCallback = (entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -41,18 +42,21 @@ export default function app() {
     }
   }, [users])
 
+  const debounceFetch = useDebouncedCallback(() => {
+    fetchUsers(searchValue, skip)
+  }, 500
+  )
+
   useEffect(() => {
     setSkip(0)
     debounceFetch()
+  }, [searchValue, debounceFetch])
 
-  }, [searchValue])
-
-  const fetchUsers = async () => {
-    if (isFetching) return
-
+  const fetchUsers = async (search: string, skip: number) => {
+    // if (!searchValue) return
     setIsFetching(true)
 
-    const res = await fetch(`${URL}search?q=${searchValue}&limit=10&skip=${skip}`)
+    const res = await fetch(`${URL}search?q=${search}&limit=10&skip=${skip}`)
     const data = await res.json()
 
     if (data.total <= 10 || data.total === skip) {
@@ -62,19 +66,11 @@ export default function app() {
     }
 
     setSkip(prev => prev += data.users.length)
-    if (searchValue !== prevSearchValue.current) {
-      setUsers(data.users)
-    } else {
-      setUsers(prevUsers => [...prevUsers, ...data.users])
-    }
+    setUsers(prevData => (skip === 0 ? data.users : [...prevData, ...data.users]));
 
     setIsFetching(false)
   }
 
-  const debounceFetch = useDebouncedCallback(() => {
-    fetchUsers()
-  }, 500
-  )
 
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSkip(0)
@@ -87,11 +83,11 @@ export default function app() {
       <Header />
       <div className="flex flex-col shadow shadow-slate-900">
         <form className="sticky top-0 w-full bg-slate-900/10 p-4">
-          <input className="w-full rounded-3xl bg-gray-700 p-2 shadow-inner shadow-gray-900" type="text" placeholder=" search..." onChange={handleOnChange} />
+          <input className="w-full rounded-3xl bg-gray-700 p-2 shadow-inner shadow-gray-900" type="text" placeholder=" Search users..." onChange={handleOnChange} />
         </form>
-        {!isFetching && users.length === 0 ? <div>No users found</div> :
-          users?.map((user) => (
-            <div key={user.id} className="flex w-full border-t border-t-gray-700/30 bg-gray-900/10 p-4">
+        {!isFetching && users.length === 0 ? <div className="text-center">No users found</div> :
+          users?.map((user, index) => (
+            <div key={`${user.id}-${index}`} className="flex w-full border-t border-t-gray-700/30 bg-gray-900/10 p-4">
               <div className="flex flex-row gap-1">
                 <img className="size-24" src={user.image}></img>
                 <div className="flex flex-col break-all ">
@@ -104,7 +100,7 @@ export default function app() {
           ))
         }
         {isFetching && <div className="w-full text-center">Loading...</div>}
-        {hasMore &&
+        {hasMore && !isFetching &&
           <div className="p-2 text-center" ref={observedRef as any}>. . .</div>
         }
       </div>
