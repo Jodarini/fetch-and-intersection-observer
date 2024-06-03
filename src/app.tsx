@@ -83,7 +83,7 @@ export default function app() {
   }
 
   return (
-    <div className="h-full w-full max-w-md">
+    <div className="h-full w-full max-w-md p-4">
       <Header />
       <div className="flex flex-col shadow shadow-slate-900">
         <form className="sticky top-0 w-full bg-slate-900/10 p-4">
@@ -105,7 +105,7 @@ export default function app() {
         }
         {isFetching && <div className="w-full text-center">Loading...</div>}
         {hasMore &&
-          <div className="my-8" ref={observedRef as any}></div>
+          <div className="p-2 text-center" ref={observedRef as any}>. . .</div>
         }
       </div>
     </div>
