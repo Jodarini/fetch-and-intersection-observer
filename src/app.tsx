@@ -95,7 +95,7 @@ export default function app() {
           <input className="w-full rounded-3xl bg-gray-700 p-2 shadow-inner shadow-gray-900" type="text" placeholder=" Search users..." onChange={handleOnChange} value={searchValue} />
         </form>
         {!isFetching && users.length === 0 ? <div className="text-center italic pb-2"> - No users found -</div> :
-          users?.map((user, index) => (
+          users?.map((user) => (
             <div key={`${user.id}`} className="flex w-full border-t border-t-gray-700/30 bg-gray-900/10 p-4">
               <div className="flex flex-row gap-1">
                 <img className="size-24" src={user.image}></img>
