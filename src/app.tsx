@@ -11,7 +11,7 @@ interface Users {
   image: string
 }
 
-const URL = 'http://dummyjson.com/users/'
+const URL = 'https://dummyjson.com/users/'
 
 export default function app() {
   const [users, setUsers] = useState<Users[]>([])
