@@ -80,7 +80,6 @@ export default function app() {
     setIsFetching(false)
   }
 
-
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSkip(0)
     prevSearchValue.current = searchValue
@@ -93,7 +92,7 @@ export default function app() {
       <Header />
       <div className="flex flex-col shadow shadow-slate-900">
         <form className="sticky top-0 w-full bg-slate-900/10 p-4">
-          <input className="w-full rounded-3xl bg-gray-700 p-2 shadow-inner shadow-gray-900" type="text" placeholder=" Search users..." onChange={handleOnChange} />
+          <input className="w-full rounded-3xl bg-gray-700 p-2 shadow-inner shadow-gray-900" type="text" placeholder=" Search users..." onChange={handleOnChange} value={searchValue} />
         </form>
         {!isFetching && users.length === 0 ? <div className="text-center italic pb-2"> - No users found -</div> :
           users?.map((user, index) => (
