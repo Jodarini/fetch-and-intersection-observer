@@ -27,7 +27,7 @@ export default function app() {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         prevSearchValue.current = searchValue
-        debounceFetch()
+        debounceFetchOnScroll()
       }
     });
   }
@@ -43,6 +43,10 @@ export default function app() {
   }, [users])
 
   const debounceFetch = useDebouncedCallback(() => {
+    fetchUsers(searchValue, 0)
+  }, 500
+  )
+  const debounceFetchOnScroll = useDebouncedCallback(() => {
     fetchUsers(searchValue, skip)
   }, 500
   )
@@ -58,6 +62,7 @@ export default function app() {
   }, [searchValue, debounceFetch])
 
   const fetchUsers = async (search: string, skip: number) => {
+    if (isFetching) return
     setIsFetching(true)
 
     const res = await fetch(`${URL}search?q=${search}&limit=10&skip=${skip}`)
@@ -70,6 +75,7 @@ export default function app() {
     }
 
     setSkip(prev => prev += data.users.length)
+
     setUsers(prevData => (skip === 0 ? data.users : [...prevData, ...data.users]));
     setIsFetching(false)
   }
@@ -91,7 +97,7 @@ export default function app() {
         </form>
         {!isFetching && users.length === 0 ? <div className="text-center italic pb-2"> - No users found -</div> :
           users?.map((user, index) => (
-            <div key={`${user.id}-${index}`} className="flex w-full border-t border-t-gray-700/30 bg-gray-900/10 p-4">
+            <div key={`${user.id}`} className="flex w-full border-t border-t-gray-700/30 bg-gray-900/10 p-4">
               <div className="flex flex-row gap-1">
                 <img className="size-24" src={user.image}></img>
                 <div className="flex flex-col break-all ">
